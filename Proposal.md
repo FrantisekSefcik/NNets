@@ -18,35 +18,38 @@ Generating images according to text description is mainly reached by GANs, but t
 suffer from training problems because of instability and mode collapse. However, new and new approaches are
 developing, and nowadays we are able to generate photorealistic images from short text description.
 
-In [1] two neural networks were used, where the first layer creates an image with primitive shapes 
+The paper [1] talks about training a deep convolutional generative adversarial net-work (DC-GAN) conditioned 
+on text features.
+
+In [2] two neural networks were used, where the first layer creates an image with primitive shapes 
 and colors according to text description, and the second layer creates a surprisingly realistic images.
 
 ![text_to_image](text_to_image1.png)
 
 To solve the problems with instability during the training process it's possible to use 
-Multi-Scale Gradient Generative Adversarial Networks (NSG-GAN)[2]. This approach allows the flow of gradients from the
+Multi-Scale Gradient Generative Adversarial Networks (NSG-GAN)[3]. This approach allows the flow of gradients from the
 discriminator to the generator at multiple scales. 
 
 Another improvment of GANs are Conditional generative adversarial networks (cGAN). In GANs there is no way
 to control the types of images that are generated other than trying to figure out the 
 complex relationship between the latent space input to the generator and the generated images.
 By conditioning the cGAN model on additional information it is possible to direct the data generation process, so we have
-better controll over the types of generated images.[3]
+better controll over the types of generated images.[4]
  
 ## Datasets
 
 We identified several datasets with available data for our experiments. Datasets usually contains images with objects 
 and theirs labels or text description. We will describe then more precisely below. 
 
-- [COCO dataset](http://cocodataset.org/#home) (Common Objects in Contest) contains more than 200K labeled images,
+- COCO dataset [5] (Common Objects in Contest) contains more than 200K labeled images,
  around 1.5 million object instances and 5 captions per image in average.
 
-- [Open images](https://storage.googleapis.com/openimages/web/index.html) is a huge dataset from Google with 
+- Open images [6] is a huge dataset from Google with 
 9M images with huge diversity, often with complex scenes and several objects. This dataset offers visual 
 relationship annotation as well, indicating pairs of objects on the images, for example "beer on table".
 There are 329 relationship triplets with almost 400 000 samples.
 
-- [Flowers](http://www.robots.ox.ac.uk/~vgg/data/flowers/102/) a dataset of 102 flower categories, where each class
+- Flowers [7] a dataset of 102 flower categories, where each class
 consist of between 40 and 258 images per class. 
 
 
@@ -74,14 +77,22 @@ generation of images with two objects.
 
 ### References
 
-[1] Han Zhang, Tao Xu, Hongsheng Li, Shaoting Zhang, Xiaogang Wang, Xiaolei Huang, Dimitris Metaxas:
+[1] Reed, Scott, et al. ”Generative adversarial text to image synthesis.” arXiv preprint arXiv:1605.05396 (2016).
+
+[2] Han Zhang, Tao Xu, Hongsheng Li, Shaoting Zhang, Xiaogang Wang, Xiaolei Huang, Dimitris Metaxas:
 StackGAN: Text to Photo-realistic Image Synthesis with Stacked Generative Adversarial Networks, 
 2017 IEEE International Conference on Computer Vision (ICCV), 2016
 
-[2] Animesh Karnewar, Oliver Wang, Raghu Sesha Iyengar:
+[3] Animesh Karnewar, Oliver Wang, Raghu Sesha Iyengar:
 MSG-GAN: Multi-Scale Gradient GAN for Stable Image Synthesis,
 ArXiv, 2019
 
-[3] Conditional Generative Adversarial Nets,
+[4] Conditional Generative Adversarial Nets,
 Mehdi Mirza, Simon Osindero,
 ArXiv, 6 Nov 2014
+
+[5] http://cocodataset.org/#home
+
+[6] https://storage.googleapis.com/openimages/web/index.htm
+
+[7] http://www.robots.ox.ac.uk/~vgg/data/flowers/102/
