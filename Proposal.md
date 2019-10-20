@@ -35,11 +35,16 @@ discriminator to the generator at multiple scales.
 We identified several datasets with available data for our experiments. Datasets usually contains images with objects 
 and theirs labels or text description. We will describe then more precisely below. 
 
-#### [COCO dataset](http://cocodataset.org/#home)
+- [COCO dataset](http://cocodataset.org/#home) (Common Objects in Contest) contains more than 200K labeled images,
+ around 1.5 million object instances and 5 captions per image in average.
 
-#### [Open images](https://storage.googleapis.com/openimages/web/index.html)
+- [Open images](https://storage.googleapis.com/openimages/web/index.html) is a huge dataset from Google with 
+9M images with huge diversity, often with complex scenes and several objects. This dataset offers visual 
+relationship annotation as well, indicating pairs of objects on the images, for example "beer on table".
+There are 329 relationship triplets with almost 400 000 samples.
 
-#### [Flowers](http://www.robots.ox.ac.uk/~vgg/data/flowers/102/)
+- [Flowers](http://www.robots.ox.ac.uk/~vgg/data/flowers/102/) a dataset of 102 flower categories, where each class
+consist of between 40 and 258 images per class. 
 
 
 ## High-Level Solution Proposal 
