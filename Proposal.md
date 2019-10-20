@@ -27,8 +27,11 @@ To solve the problems with instability during the training process it's possible
 Multi-Scale Gradient Generative Adversarial Networks (NSG-GAN)[2]. This approach allows the flow of gradients from the
 discriminator to the generator at multiple scales. 
 
-- [Conditional GAN](https://golden.com/wiki/Conditional_generative_adversarial_network_(cGAN)
- 
+Another improvment of GANs are Conditional generative adversarial networks (cGAN). In GANs there is no way
+to control the types of images that are generated other than trying to figure out the 
+complex relationship between the latent space input to the generator and the generated images.
+By conditioning the cGAN model on additional information it is possible to direct the data generation process, so we have
+better controll over the types of generated images.[3]
  
 ## Datasets
 
@@ -78,3 +81,7 @@ StackGAN: Text to Photo-realistic Image Synthesis with Stacked Generative Advers
 [2] Animesh Karnewar, Oliver Wang, Raghu Sesha Iyengar:
 MSG-GAN: Multi-Scale Gradient GAN for Stable Image Synthesis,
 ArXiv, 2019
+
+[3] Conditional Generative Adversarial Nets,
+Mehdi Mirza, Simon Osindero,
+ArXiv, 6 Nov 2014
