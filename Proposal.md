@@ -2,23 +2,32 @@
 
 ## Motivation
 
-In this project we will solve problem of text to image generation by Deep Convolutional Generative Adversarial Network 
-(GAN). Today GANs are very interesting field of research, because they belong to the set of generative models. 
-It means that they are able to generate new content, what is kind of magic. We know using of GANs from many cases but 
-creating new images from text description is interesting ideas in computer science today. 
+In this project we will solve problem of generating images from text description by Deep Convolutional 
+Generative Adversarial Network (GAN). Today GANs are very interesting field of research, because they 
+belong to the set of generative models. It means that they are able to generate new content, what is 
+kind of magic. We know about using of GANs in several fields, but creating new images from text 
+description is an exciting idea in computer science today. 
+
+Creating images from text has many real life application. It enables for example creating new characters
+in cartoons or video games, drawing illustration into the books, or even creating phantom images of 
+criminals according to witnesses' description. 
 
 ## Related work
 
-[Generative Adversarial Text to Image Synthesis](https://arxiv.org/pdf/1605.05396.pdf)
+Generating images according to text description is mainly reached by GANs, but the existing models often 
+suffer from training problems because of instability and mode collapse. However, new and new approaches are
+developing, and nowadays we are able to generate photorealistic images from short text description.
 
-[StackGAN: Text to Photo-realistic Image Synthesis with Stacked Generative Adversarial Networks](
-http://openaccess.thecvf.com/content_ICCV_2017/papers/Zhang_StackGAN_Text_to_ICCV_2017_paper.pdf)
+In [1] two neural networks were used, where the first layer creates an image with primitive shapes 
+and colors according to text description, and the second layer creates a surprisingly realistic images.
 
- [Multi-Scale Gradient GAN for Stable Image Synthesis](https://arxiv.org/pdf/1903.06048.pdf)
+![text_to_image](text_to_image1.png)
 
- [Keras-text-to-image](https://github.com/chen0040/keras-text-to-image#keras-text-to-image)
- 
- [Conditional GAN](https://golden.com/wiki/Conditional_generative_adversarial_network_(cGAN))
+To solve the problems with instability during the training process it's possible to use 
+Multi-Scale Gradient Generative Adversarial Networks (NSG-GAN)[2]. This approach allows the flow of gradients from the
+discriminator to the generator at multiple scales. 
+
+- [Conditional GAN](https://golden.com/wiki/Conditional_generative_adversarial_network_(cGAN)
  
  
 ## Datasets
@@ -26,24 +35,11 @@ http://openaccess.thecvf.com/content_ICCV_2017/papers/Zhang_StackGAN_Text_to_ICC
 We identified several datasets with available data for our experiments. Datasets usually contains images with objects 
 and theirs labels or text description. We will describe then more precisely below. 
 
-#### COCO dataset [[13](http://cocodataset.org/#home)]
+#### [COCO dataset](http://cocodataset.org/#home)
 
-#### Open images [[12](https://storage.googleapis.com/openimages/web/index.html)]
+#### [Open images](https://storage.googleapis.com/openimages/web/index.html)
 
-#### Flowers [[14](http://www.robots.ox.ac.uk/~vgg/data/flowers/102/)]
-
-
-
-
-
-
-
-
-[12] https://storage.googleapis.com/openimages/web/index.html
-
-[13] http://cocodataset.org/#home
-
-[14] (http://www.robots.ox.ac.uk/~vgg/data/flowers/102/)
+#### [Flowers](http://www.robots.ox.ac.uk/~vgg/data/flowers/102/)
 
 
 ## High-Level Solution Proposal 
@@ -67,3 +63,13 @@ several classes to avoid big complexity. Then we will tune and train our model t
 3. As a third experiment we would like to use data challenge from Openimage dataset. This challenge offers images with 
 relations of two objects in image (man at horse, etc ...).  In case it wouldn't be out of scope we will implement 
 generation of images with two objects.    
+
+### References
+
+[1] Han Zhang, Tao Xu, Hongsheng Li, Shaoting Zhang, Xiaogang Wang, Xiaolei Huang, Dimitris Metaxas:
+StackGAN: Text to Photo-realistic Image Synthesis with Stacked Generative Adversarial Networks, 
+2017 IEEE International Conference on Computer Vision (ICCV), 2016
+
+[2] Animesh Karnewar, Oliver Wang, Raghu Sesha Iyengar:
+MSG-GAN: Multi-Scale Gradient GAN for Stable Image Synthesis,
+ArXiv, 2019
