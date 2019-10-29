@@ -30,11 +30,11 @@ To solve the problems with instability during the training process it's possible
 Multi-Scale Gradient Generative Adversarial Networks (NSG-GAN)[3]. This approach allows the flow of gradients from the
 discriminator to the generator at multiple scales. 
 
-Another improvment of GANs are Conditional generative adversarial networks (cGAN). In GANs there is no way
+Another improvement of GANs are Conditional generative adversarial networks (cGAN). In GANs there is no way
 to control the types of images that are generated other than trying to figure out the 
 complex relationship between the latent space input to the generator and the generated images.
 By conditioning the cGAN model on additional information it is possible to direct the data generation process, so we have
-better controll over the types of generated images.[4]
+better control over the types of generated images.[4]
  
 ## Datasets
 
