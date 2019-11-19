@@ -3,3 +3,7 @@
 image*
 training_checkpoints
 __pycache__/
+text_to_image/data/train/*
+text_to_image/data/test/*
+text_to_image/data/valid/*
+text_to_image/data/.ipnb_checkpoints/*
