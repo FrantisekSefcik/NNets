@@ -19,5 +19,6 @@ docker build -t nnets/tensorflow:2.0.0-gpu-py3-jupyter .
 ```shell script
 cd ..
 docker run --gpus all -u $(id -u):$(id -g) --rm -p 8888:8888 -p 6006:6006 -v $(pwd):/project -it --name nnets_project nnets/tensorflow:2.0.0-gpu-py3-jupyter
+
 ```
 
