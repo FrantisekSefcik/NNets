@@ -8,9 +8,6 @@ import random
 import category_encoders as ce
 
 
-label_names = pd.read_csv('./metadata/label_names.csv', header=None, names=['Code', 'Name'])
-
-
 def load_data(ids_location, labels_location, relationship_location):
     ids = pd.read_csv(ids_location)
     labels = pd.read_csv(labels_location)
@@ -71,7 +68,8 @@ def get_ids_with_labels(df_images, df_labels, labels, file_name='image_ids', fil
     return find_image_ids_with_labels(new_df, df_labels, labels, file_name=file_name, file_type=file_type)
 
 
-def decode_class_names(class_codes):
+def decode_class_names(class_codes, path):
+    label_names = pd.read_csv(path, header=None, names=['Code', 'Name'])
     return [label_names.loc[label_names['Code'] == class_code].iat[0, 1] for class_code in class_codes]
 
 
@@ -190,3 +188,58 @@ def image_array_generator(urls, df_rel, df_ids, batch_size=0,
                     yield batch
                     batch = []
     yield batch
+
+
+def image_array_generator2(urls, df_rel, df_ids, batch_size=0,
+                           resize=True, size=(300, 300), interpolation=cv2.INTER_LINEAR,
+                           normalize=True, min=-1, max=1, norm_type=cv2.NORM_MINMAX):
+    """
+    Generator prepares batches of images for NN
+
+    :param df_ids: dataframe with image IDs and URLs
+    :param df_rel: dataframe with labeled relationships
+    :param urls: list of urls of images
+    :param batch_size: int
+    :param resize: bool - defines whether image scaling should be used
+    :param size: tuple (int, int) - new size of the images, if resize is True
+    :param interpolation: interpolation method from cv2
+    :param normalize: bool - defines whether pixel values should be normalized
+    :param min: float - the min normalized value if normalize is true
+    :param max: float - the max normalized value if normalize is true
+    :param norm_type: normalization type from cv2
+
+    yields a batch of preprocessed images
+    """
+    batch_images = []
+    batch_labels1 = []
+    batch_labels_rel = []
+    batch_labels2 = []
+    encoder = create_ordinal_encoder_for_triplets(df_rel)
+    if batch_size == 0:
+        batch_size = len(urls)
+    random.shuffle(urls)
+    for URL in urls:
+        # print(URL)
+        if len(batch_images) >= batch_size:
+            yield [batch_images, batch_labels1, batch_labels_rel, batch_labels2]
+            batch_images = []
+            batch_labels1 = []
+            batch_labels_rel = []
+            batch_labels2 = []
+        image = load_image(URL)
+        if image is not None:
+            if resize:
+                image = resize_image(image, size, interpolation)
+            if normalize:
+                image = normalize_image(image, min, max, norm_type)
+
+            image_id = df_ids[df_ids['OriginalURL'] == URL]['ImageID'].values[0]
+
+            coded_labels = encode_image_labels(image_id, df_rel, encoder)
+            print(coded_labels.iloc[0,0])
+            batch_labels1.append(coded_labels.iloc[0,0])
+            batch_labels_rel.append(coded_labels.iloc[0,1])
+            batch_labels2.append(coded_labels.iloc[0,2])
+            batch_images.append(image)
+
+    yield [batch_images, batch_labels1, batch_labels_rel, batch_labels2]
