@@ -15,29 +15,29 @@ def load_data(ids_location, labels_location, relationship_location):
     return ids, labels, relationships
 
 
-def basic_analysis(ids, labels):
+def basic_analysis(ids, labels, metadata_path='./metadata/label_names.csv'):
     print("number of images: " + str(ids.shape[0]))
-    top_overall = top_labels_analysis(labels)
+    top_overall = top_labels_analysis(labels, metadata_path)
     print()
 
     groupby_label = labels.groupby(['ImageID']).count()
     one_label = groupby_label[groupby_label['LabelName'] < 2]
 
     print("number of images with 1 label: " + str(len(one_label)))
-    top_one_label = top_labels_analysis(labels.loc[labels['ImageID'].isin(one_label.index)])
+    top_one_label = top_labels_analysis(labels.loc[labels['ImageID'].isin(one_label.index)], metadata_path)
     print()
 
     return top_overall, top_one_label
 
 
-def top_labels_analysis(df):
+def top_labels_analysis(df, metadata_path):
     print("number of label classes: " + str(df['LabelName'].nunique()))
     print("average number of labels per image: " + str(
         df['ImageID'].count() / df['ImageID'].nunique()))
     print("top 10 classes: ")
     top_classes = df.groupby('LabelName').count().sort_values('ImageID', ascending=False).head(10)['ImageID']
     top_classes = top_classes.to_frame()
-    top_classes['Name'] = decode_class_names(top_classes.index)
+    top_classes['Name'] = decode_class_names(top_classes.index, metadata_path)
     top_classes.columns = ['Image count', 'Class name']
     top_classes.loc['sum'] = [top_classes['Image count'].sum(), "sum"]
     print(top_classes)
@@ -68,7 +68,7 @@ def get_ids_with_labels(df_images, df_labels, labels, file_name='image_ids', fil
     return find_image_ids_with_labels(new_df, df_labels, labels, file_name=file_name, file_type=file_type)
 
 
-def decode_class_names(class_codes, path):
+def decode_class_names(class_codes, path='./metadata/label_names.csv'):
     label_names = pd.read_csv(path, header=None, names=['Code', 'Name'])
     return [label_names.loc[label_names['Code'] == class_code].iat[0, 1] for class_code in class_codes]
 
@@ -83,10 +83,20 @@ def get_image_labels(image_id, labels_df):
     return labels_df[labels_df["ImageID"] == image_id]['LabelName'].values
 
 
-def get_image_relationships(df_rel, image_id):
-    return df_rel[df_rel['ImageID'] == image_id][['LabelName1',
-                                                  'RelationshipLabel',
-                                                  'LabelName2']].reset_index(drop=True)
+def get_image_relationships(df_rel, image_id, cols=['LabelName1',
+                                                         'RelationshipLabel',
+                                                         'LabelName2']):
+    return df_rel[df_rel['ImageID'] == image_id][cols].reset_index(drop=True)
+
+
+def map_top_labels(df, top_labels):
+    mapping_labels = pd.Series([i for i in range(len(top_labels))], index=top_labels)
+    top_map = [{"col": "LabelName1", "mapping": mapping_labels},
+               {"col": "LabelName2", "mapping": mapping_labels}
+               ]
+    e = ce.OrdinalEncoder(mapping=top_map)
+    e.fit(df[['LabelName1', 'LabelName2']])
+    return e
 
 
 def get_object_bounding_boxes(df_rel, image_id):
@@ -136,8 +146,10 @@ def create_ordinal_encoder_for_triplets(df):
     return e
 
 
-def encode_image_labels(image_id, df_rel, encoder):
-    labels = get_image_relationships(df_rel, image_id)
+def encode_image_labels(image_id, df_rel, encoder, cols=['LabelName1',
+                                                         'RelationshipLabel',
+                                                         'LabelName2']):
+    labels = get_image_relationships(df_rel, image_id, cols)
     return encoder.transform(labels)
 
 
@@ -190,12 +202,13 @@ def image_array_generator(urls, df_rel, df_ids, batch_size=0,
     yield batch
 
 
-def image_array_generator2(urls, df_rel, df_ids, batch_size=0,
+def image_array_generator2(urls, df_rel, df_ids, labels=[], batch_size=0,
                            resize=True, size=(300, 300), interpolation=cv2.INTER_LINEAR,
                            normalize=True, min=-1, max=1, norm_type=cv2.NORM_MINMAX):
     """
     Generator prepares batches of images for NN
 
+    :param labels: array-like - list of labels used
     :param df_ids: dataframe with image IDs and URLs
     :param df_rel: dataframe with labeled relationships
     :param urls: list of urls of images
@@ -212,19 +225,17 @@ def image_array_generator2(urls, df_rel, df_ids, batch_size=0,
     """
     batch_images = []
     batch_labels1 = []
-    batch_labels_rel = []
     batch_labels2 = []
-    encoder = create_ordinal_encoder_for_triplets(df_rel)
+    encoder = map_top_labels(df_rel, labels)
     if batch_size == 0:
         batch_size = len(urls)
     random.shuffle(urls)
     for URL in urls:
         # print(URL)
         if len(batch_images) >= batch_size:
-            yield [batch_images, batch_labels1, batch_labels_rel, batch_labels2]
+            yield [batch_images, batch_labels1, batch_labels2]
             batch_images = []
             batch_labels1 = []
-            batch_labels_rel = []
             batch_labels2 = []
         image = load_image(URL)
         if image is not None:
@@ -235,11 +246,10 @@ def image_array_generator2(urls, df_rel, df_ids, batch_size=0,
 
             image_id = df_ids[df_ids['OriginalURL'] == URL]['ImageID'].values[0]
 
-            coded_labels = encode_image_labels(image_id, df_rel, encoder)
-            print(coded_labels.iloc[0,0])
-            batch_labels1.append(coded_labels.iloc[0,0])
-            batch_labels_rel.append(coded_labels.iloc[0,1])
-            batch_labels2.append(coded_labels.iloc[0,2])
+            coded_labels = encode_image_labels(image_id, df_rel, encoder, cols=['LabelName1','LabelName2'])
+
+            batch_labels1.append(coded_labels.iloc[0, 0])
+            batch_labels2.append(coded_labels.iloc[0, 1])
             batch_images.append(image)
 
-    yield [batch_images, batch_labels1, batch_labels_rel, batch_labels2]
+    yield [batch_images, batch_labels1, batch_labels2]
