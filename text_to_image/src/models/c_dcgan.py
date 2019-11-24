@@ -8,7 +8,7 @@ class GAN:
         self.image_shape = image_shape
         self.noise_dim = noise_dim
         self.n_classes = n_classes
-        self.optimizer = Adam(0.0002, beta_1=0.5)
+        self.optimizer = Adam(0.0001, beta_1=0.5)
         self.discriminator = self.get_discriminator()
         self.generator = self.get_generator()
         self.combined = self.get_combined()
@@ -60,7 +60,7 @@ class GAN:
         model = Model([input_image, input_label], output_layer)
         model.compile(
             loss='binary_crossentropy',
-            optimizer=self.optimizer,
+            optimizer=Adam(0.0002, beta_1=0.5),
             metrics=['accuracy']
         )
         return model
@@ -73,6 +73,6 @@ class GAN:
         model = Model([gen_noise, gen_label], gan_output)
         model.compile(
             loss='binary_crossentropy',
-            optimizer=self.optimizer
+            optimizer=Adam(0.0002, beta_1=0.5)
         )
         return model
