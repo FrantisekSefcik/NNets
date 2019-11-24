@@ -5,6 +5,8 @@ from PIL import Image
 import requests
 import io
 import random
+import category_encoders as ce
+
 
 label_names = pd.read_csv('./metadata/label_names.csv', header=None, names=['Code', 'Name'])
 
@@ -84,10 +86,20 @@ def get_image_labels(image_id, labels_df):
 
 
 def get_image_relationships(df_rel, image_id):
-    l1 = df_rel[df_rel['ImageID'] == image_id]['LabelName1']
-    lr = df_rel[df_rel['ImageID'] == image_id]['RelationshipLabel']
-    l2 = df_rel[df_rel['ImageID'] == image_id]['LabelName2']
-    return [a + " " for a in decode_class_names(l1)] + lr + [" " + a for a in decode_class_names(l2)]
+    return df_rel[df_rel['ImageID'] == image_id][['LabelName1',
+                                                  'RelationshipLabel',
+                                                  'LabelName2']].reset_index(drop=True)
+
+
+def get_object_bounding_boxes(df_rel, image_id):
+    return df_rel[df_rel['ImageID'] == image_id][['XMin1',
+                                                  'XMax1',
+                                                  'YMin1',
+                                                  'YMax1',
+                                                  'XMin2',
+                                                  'XMax2',
+                                                  'YMin2',
+                                                  'YMax2']].reset_index(drop=True)
 
 
 def load_image(url):
@@ -107,12 +119,38 @@ def resize_image(cv2_image, new_size=(300, 300), interpolation_mode=cv2.INTER_LI
     return cv2.resize(cv2_image, new_size, interpolation_mode)
 
 
-def image_array_generator(urls, batch_size=0,
+def create_ordinal_encoder_for_triplets(df):
+    l1 = df['LabelName1'].unique()
+    l2 = df['LabelName2'].unique()
+    labels = np.union1d(l1, l2)
+    rel = df['RelationshipLabel'].unique()
+
+    mapping_labels = pd.Series([i for i in range(len(labels))], index=labels)
+    mapping_rel = pd.Series([i for i in range(len(rel))], index=rel)
+
+    top_map = [{"col": "LabelName1", "mapping": mapping_labels},
+               {"col": "LabelName2", "mapping": mapping_labels},
+               {"col": "RelationshipLabel", "mapping": mapping_rel},
+               ]
+
+    e = ce.OrdinalEncoder(mapping=top_map)
+    e.fit(df[['LabelName1', 'RelationshipLabel', 'LabelName2']])
+    return e
+
+
+def encode_image_labels(image_id, df_rel, encoder):
+    labels = get_image_relationships(df_rel, image_id)
+    return encoder.transform(labels)
+
+
+def image_array_generator(urls, df_rel, df_ids, batch_size=0,
                           resize=True, size=(300, 300), interpolation=cv2.INTER_LINEAR,
                           normalize=True, min=-1, max=1, norm_type=cv2.NORM_MINMAX):
     """
     Generator prepares batches of images for NN
 
+    :param df_ids: dataframe with image IDs and URLs
+    :param df_rel: dataframe with labeled relationships
     :param urls: list of urls of images
     :param batch_size: int
     :param resize: bool - defines whether image scaling should be used
@@ -125,8 +163,8 @@ def image_array_generator(urls, batch_size=0,
 
     yields a batch of preprocessed images
     """
-    i = 0
     batch = []
+    encoder = create_ordinal_encoder_for_triplets(df_rel)
     if batch_size == 0:
         batch_size = len(urls)
     random.shuffle(urls)
@@ -135,13 +173,20 @@ def image_array_generator(urls, batch_size=0,
         if len(batch) >= batch_size:
             yield batch
             batch = []
-            i = 0
         image = load_image(URL)
         if image is not None:
             if resize:
                 image = resize_image(image, size, interpolation)
             if normalize:
                 image = normalize_image(image, min, max, norm_type)
-            batch.append(image)
-        i += 1
+
+            image_id = df_ids[df_ids['OriginalURL'] == URL]['ImageID'].values[0]
+
+            coded_labels = encode_image_labels(image_id, df_rel, encoder)
+            bounding_boxes = get_object_bounding_boxes(df_rel, image_id)
+            for i, lab in coded_labels.iterrows():
+                batch.append([image, lab.values, bounding_boxes.iloc[i].values])
+                if len(batch) >= batch_size:
+                    yield batch
+                    batch = []
     yield batch
