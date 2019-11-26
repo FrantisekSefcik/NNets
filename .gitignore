@@ -8,3 +8,5 @@ text_to_image/data/test/*
 text_to_image/data/valid/*
 text_to_image/data/metadata/*
 text_to_image/data/.ipnb_checkpoints/*
+log
+logs

@@ -1,7 +1,7 @@
 from numpy.random import randint, randn
 import numpy as np
 import matplotlib.pyplot as plt
-import tensorflow as tf
+
 
 class CGanTrainer:
     def __init__(self, discriminator, generator, combined, batch_size, n_classes, noise_dim):
@@ -44,7 +44,6 @@ class CGanTrainer:
         plt.savefig('images/image_at_epoch_{:04d}.png'.format(epoch))
         # plt.show()
         return np.array(fig.canvas.renderer._renderer)
-
 
     def create_fig(self, epoch):
         noise, _ = self.generate_fake_input(self.n_classes * 10)

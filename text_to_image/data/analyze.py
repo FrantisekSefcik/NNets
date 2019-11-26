@@ -8,9 +8,6 @@ import random
 import category_encoders as ce
 
 
-label_names = pd.read_csv('./metadata/label_names.csv', header=None, names=['Code', 'Name'])
-
-
 def load_data(ids_location, labels_location, relationship_location):
     ids = pd.read_csv(ids_location)
     labels = pd.read_csv(labels_location)
@@ -71,7 +68,8 @@ def get_ids_with_labels(df_images, df_labels, labels, file_name='image_ids', fil
     return find_image_ids_with_labels(new_df, df_labels, labels, file_name=file_name, file_type=file_type)
 
 
-def decode_class_names(class_codes):
+def decode_class_names(class_codes, path='./metadata/label_names.csv'):
+    label_names = pd.read_csv(path, header=None, names=['Code', 'Name'])
     return [label_names.loc[label_names['Code'] == class_code].iat[0, 1] for class_code in class_codes]
 
 

@@ -1,12 +1,9 @@
-
 from datetime import datetime
-
 from numpy import expand_dims
 from numpy.random import randint
 from tensorflow.keras.datasets.fashion_mnist import load_data
 import tensorflow as tf
 import sys
-
 sys.path.append("..")
 from src.models.c_dcgan import GAN
 from src.models.train_helpers import CGanTrainer
@@ -55,6 +52,7 @@ def train(g_model, d_model, gan_model, dataset, latent_dim, callbacks, n_epochs=
             tf.summary.scalar('gan loss', data=gan_loss, step=i)
 
         print('EPOCH:', i)
+        trainer.save_fig(i)
     g_model.save('cgan_generator.h5')
 
 
@@ -70,4 +68,4 @@ callback = tf.keras.callbacks.TensorBoard(log_path)
 callback.set_model(gan_model)
 
 # train model
-train(g_model, d_model, gan_model, dataset, latent_dim, callback, 3)
+train(g_model, d_model, gan_model, dataset, latent_dim, callback, 50)
