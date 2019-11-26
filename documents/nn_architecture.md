@@ -40,7 +40,10 @@ We monitor training process with TensorBoard when we log loss values of all thre
 new generated images so we can control reliability of generated images.
 
 * logging
+
 ![text_to_image](./imgs/loss.png)
+
 * images
+
 ![text_to_image](./imgs/epoch_0005.png)        
 
