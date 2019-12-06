@@ -41,18 +41,26 @@ def get_boundaries(imagex, imagey, xmin, xmax, ymin, ymax):
         if newymin < 0:
             newymax += newymin
             newymin = 0
+            if newymax > imagey:
+                newymax = imagey
         elif newymax > imagey:
             newymin -= (newymax - imagey)
             newymax = imagey
+            if newymin < 0:
+                newymin = 0
     elif sizedif > 0:
         newxmin -= sizedifhalf + par
         newxmax += sizedifhalf
         if newxmin < 0:
-            newxmax -= newxmin
+            newxmax += newxmin
             newxmin = 0
+            if newxmax > imagex:
+                newxmax = imagex
         elif newxmax > imagex:
             newxmin -= (newxmax - imagex)
             newxmax = imagex
+            if newxmin < 0:
+                newxmin = 0
 
     return newxmin, newxmax, newymin, newymax
 
