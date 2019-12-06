@@ -1,7 +1,10 @@
 from numpy.random import randint, randn
 import numpy as np
 import matplotlib.pyplot as plt
+import io
+import matplotlib
 
+matplotlib.rcParams['figure.figsize'] = [20, 20]
 
 class CGanTrainer:
     def __init__(self, discriminator, generator, combined, batch_size, n_classes, noise_dim):
@@ -40,10 +43,14 @@ class CGanTrainer:
         for i in range(self.n_classes * n):
             plt.subplot(self.n_classes, n, 1 + i)
             plt.axis('off')
-            plt.imshow(examples[i, :, :, 0], cmap='gray_r')
+            plt.imshow(examples[i])
         plt.savefig('images/image_at_epoch_{:04d}.png'.format(epoch))
-        # plt.show()
-        return np.array(fig.canvas.renderer._renderer)
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        plt.show()
+        # return np.array(fig.canvas.renderer._renderer)
+        return buf
 
     def create_fig(self, epoch):
         noise, _ = self.generate_fake_input(self.n_classes * 10)
