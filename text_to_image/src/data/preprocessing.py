@@ -92,7 +92,7 @@ def image_generator(imgs_dir, relationships, top, labels_coded,
                     boxes.append(box)
 
                     if 0 < batch_size <= len(labels):
-                        yield labels, boxes
+                        yield np.array(boxes), np.array(labels)
                         labels = []
                         boxes = []
 
@@ -110,10 +110,10 @@ def image_generator(imgs_dir, relationships, top, labels_coded,
                     boxes.append(box)
 
                     if 0 < batch_size <= len(labels):
-                        yield labels, boxes
+                        yield np.array(boxes), np.array(labels)
                         labels = []
                         boxes = []
-    yield labels, boxes
+    yield np.array(boxes), np.array(labels)
 
 
 def get_image_generator(relationships_location, imgs_dir,
