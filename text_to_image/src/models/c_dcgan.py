@@ -108,8 +108,6 @@ class GANColor:
         gen = layers.LeakyReLU(alpha=0.2)(gen)
         gen = layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same')(gen)
         gen = layers.LeakyReLU(alpha=0.2)(gen)
-        gen = layers.Conv2DTranspose(128, (4, 4), strides=(2, 2), padding='same')(gen)
-        gen = layers.LeakyReLU(alpha=0.2)(gen)
         output_layer = layers.Conv2D(3, (7, 7), activation='tanh', padding='same')(gen)
         # define model
         model = Model([input_noise, input_label], output_layer)
