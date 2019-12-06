@@ -113,7 +113,7 @@ def image_generator(imgs_dir, relationships, top, labels_coded,
                         yield labels, boxes
                         labels = []
                         boxes = []
-        yield labels, boxes
+    yield labels, boxes
 
 
 def get_image_generator(relationships_location, imgs_dir,
