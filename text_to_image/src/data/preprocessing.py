@@ -90,7 +90,7 @@ def image_generator(imgs_dir, relationships, top, labels_coded,
                 if label in top:
                     x1min, x1max, y1min, y1max = row['XMin1'], row['XMax1'], row['YMin1'], row['YMax1']
 
-                    labels.append(labels_coded[row['LabelName1']])
+                    labels.append(labels_coded[label])
                     x1, x2, y1, y2 = get_boundaries(imagex, imagey, x1min, x1max, y1min, y1max)
                     box = image[x1: x2, y1: y2]
                     if resize:
@@ -108,7 +108,7 @@ def image_generator(imgs_dir, relationships, top, labels_coded,
 
                 if label in top:
                     x2min, x2max, y2min, y2max = row['XMin2'], row['XMax2'], row['YMin2'], row['YMax2']
-                    labels.append(labels_coded[row['LabelName1']])
+                    labels.append(labels_coded[label])
                     x1, x2, y1, y2 = get_boundaries(imagex, imagey, x2min, x2max, y2min, y2max)
                     box = image[x1: x2, y1: y2]
                     if resize:
