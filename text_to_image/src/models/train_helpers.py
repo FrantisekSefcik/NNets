@@ -43,13 +43,15 @@ class CGanTrainer:
         for i in range(n * m):
             plt.subplot(m, n, 1 + i)
             plt.axis('off')
-            plt.imshow(examples[i])
+            if examples[i].shape[2] > 1:
+                plt.imshow(examples[i])
+            else:
+                plt.imshow(examples[i, :, :, 0], cmap='gray_r')
         plt.savefig('images/image_at_epoch_{:04d}.png'.format(epoch))
         buf = io.BytesIO()
         plt.savefig(buf, format='png')
         buf.seek(0)
         plt.show()
-        # return np.array(fig.canvas.renderer._renderer)
         return buf
 
     def create_fig(self, epoch):
@@ -65,5 +67,8 @@ def generate_image_show(generator, noise_dim, label):
     fake_noise = x_input.reshape(1, noise_dim)
     image = generator.predict([fake_noise, np.array([label])])
     image = (image + 1) / 2.0
-    plt.imshow(image[0])
+    if image.shape[3] > 1:
+        plt.imshow(image[0])
+    else:
+        plt.imshow(image[0, :, :, 0], cmap='gray_r')
     return image
