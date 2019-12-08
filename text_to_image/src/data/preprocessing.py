@@ -74,11 +74,13 @@ def image_generator(imgs_dir, relationships, top, labels_coded,
     labels = []
     boxes = []
 
-    for file in os.listdir(directory):
+    for file in os.listdir(directory)[:1000]:
         filename = os.fsdecode(file)
         if filename.endswith(".npy"):
             image_id = filename.split('.')[0]
             image = np.load(imgs_dir + filename)
+            if len(image.shape) < 3:
+                continue
 
             for index, row in relationships[relationships['ImageID'] == image_id].iterrows():
 
@@ -121,7 +123,8 @@ def image_generator(imgs_dir, relationships, top, labels_coded,
                         yield np.array(boxes), np.array(labels)
                         labels = []
                         boxes = []
-    yield np.array(boxes), np.array(labels)
+    # yield np.array(boxes), np.array(labels)
+    return
 
 
 def get_image_generator(relationships_location, imgs_dir,
