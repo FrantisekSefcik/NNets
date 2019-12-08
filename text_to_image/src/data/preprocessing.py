@@ -65,16 +65,16 @@ def get_boundaries(imagex, imagey, xmin, xmax, ymin, ymax):
     return newxmin, newxmax, newymin, newymax
 
 
-def image_generator(imgs_dir, relationships, top, labels_coded,
-                    batch_size=0,
-                    resize=True, size=(300, 300), interpolation=cv2.INTER_LINEAR,
-                    normalize=True, min=-1, max=1, norm_type=cv2.NORM_MINMAX):
+def image_preprocessing_func(imgs_dir, relationships, top, labels_coded,
+                             number_of_images=-1,
+                             resize=True, size=(300, 300), interpolation=cv2.INTER_LINEAR,
+                             normalize=True, min=-1, max=1, norm_type=cv2.NORM_MINMAX):
     directory = os.fsencode(imgs_dir)
 
     labels = []
     boxes = []
 
-    for file in os.listdir(directory)[:1000]:
+    for file in os.listdir(directory)[:number_of_images]:
         filename = os.fsdecode(file)
         if filename.endswith(".npy"):
             image_id = filename.split('.')[0]
@@ -101,11 +101,6 @@ def image_generator(imgs_dir, relationships, top, labels_coded,
                         box = normalize_image(box, min, max, norm_type)
                     boxes.append(box)
 
-                    if 0 < batch_size <= len(labels):
-                        yield np.array(boxes), np.array(labels)
-                        labels = []
-                        boxes = []
-
                 label = row['LabelName2']
 
                 if label in top:
@@ -119,17 +114,12 @@ def image_generator(imgs_dir, relationships, top, labels_coded,
                         box = normalize_image(box, min, max, norm_type)
                     boxes.append(box)
 
-                    if 0 < batch_size <= len(labels):
-                        yield np.array(boxes), np.array(labels)
-                        labels = []
-                        boxes = []
-    # yield np.array(boxes), np.array(labels)
-    return
+    return np.array(boxes), np.array(labels)
 
 
 def get_image_generator(relationships_location, imgs_dir,
                         top_n_labels=10,
-                        batch_size=0,
+                        number_of_images=-1,
                         resize=True, size=(300, 300), interpolation=cv2.INTER_LINEAR,
                         normalize=True, min=-1, max=1, norm_type=cv2.NORM_MINMAX
                         ):
@@ -154,7 +144,7 @@ def get_image_generator(relationships_location, imgs_dir,
     for i in range(len(top)):
         labels_coded[top[i]] = i
 
-    g = image_generator(imgs_dir, relationships, top, labels_coded,
-                        batch_size, resize, size, interpolation,
-                        normalize, min, max, norm_type)
+    g = image_preprocessing_func(imgs_dir, relationships, top, labels_coded,
+                                 number_of_images, resize, size, interpolation,
+                                 normalize, min, max, norm_type)
     return g, labels_coded
