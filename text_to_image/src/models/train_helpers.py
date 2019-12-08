@@ -38,10 +38,10 @@ class CGanTrainer:
         fake_noise = x_input.reshape(n_samples, self.noise_dim)
         return fake_noise, fake_labels
 
-    def save_and_show_plot(self, examples, n, epoch):
+    def save_and_show_plot(self, examples, n, m, epoch):
         fig, ax = plt.subplots()
-        for i in range(self.n_classes * n):
-            plt.subplot(self.n_classes, n, 1 + i)
+        for i in range(n * m):
+            plt.subplot(m, n, 1 + i)
             plt.axis('off')
             plt.imshow(examples[i])
         plt.savefig('images/image_at_epoch_{:04d}.png'.format(epoch))
@@ -53,10 +53,17 @@ class CGanTrainer:
         return buf
 
     def create_fig(self, epoch):
-        noise, _ = self.generate_fake_input(self.n_classes * 10)
-        labels = np.asarray([x for _ in range(self.n_classes) for x in range(10)])
+        noise, labels = self.generate_fake_input(25)
+        # labels = np.asarray([x for _ in range(self.n_classes) for x in range(10)])
         images = self.generator.predict([noise, labels])
         images = (images + 1) / 2.0
-        return self.save_and_show_plot(images, 10, epoch)
+        return self.save_and_show_plot(images, 5, 5, epoch)
 
 
+def generate_image_show(generator, noise_dim, label):
+    x_input = randn(noise_dim)
+    fake_noise = x_input.reshape(1, noise_dim)
+    image = generator.predict([fake_noise, np.array([label])])
+    image = (image + 1) / 2.0
+    plt.imshow(image[0])
+    return image
