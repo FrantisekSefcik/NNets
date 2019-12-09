@@ -84,7 +84,7 @@ def image_preprocessing_func(imgs_dir, relationships, top, labels_coded,
 
             for index, row in relationships[relationships['ImageID'] == image_id].iterrows():
 
-                label = row['LabelName1']
+                label = row['DecodedName1']
 
                 imagex = image.shape[1]
                 imagey = image.shape[0]
@@ -101,7 +101,7 @@ def image_preprocessing_func(imgs_dir, relationships, top, labels_coded,
                         box = normalize_image(box, min, max, norm_type)
                     boxes.append(box)
 
-                label = row['LabelName2']
+                label = row['DecodedName2']
 
                 if label in top:
                     x2min, x2max, y2min, y2max = row['XMin2'], row['XMax2'], row['YMin2'], row['YMax2']
@@ -117,18 +117,20 @@ def image_preprocessing_func(imgs_dir, relationships, top, labels_coded,
     return np.array(boxes), np.array(labels)
 
 
-def get_image_generator(relationships_location, imgs_dir,
-                        top_n_labels=10,
-                        number_of_images=-1,
-                        resize=True, size=(300, 300), interpolation=cv2.INTER_LINEAR,
-                        normalize=True, min=-1, max=1, norm_type=cv2.NORM_MINMAX
-                        ):
-    relationships = pd.read_csv(relationships_location)
+def get_decode_dict(path='../../data/metadata/label_names.csv'):
+    decode_dict = {}
+    label_names = pd.read_csv(path, header=None, names=['Code', 'Name'])
+    for index, row in label_names.iterrows():
+        decode_dict[row['Code']] = row['Name']
+    return decode_dict
 
-    top_labels1 = relationships.groupby('LabelName1').count().sort_values(
+
+def get_top_n_labels(df_relationships, top_n_labels):
+
+    top_labels1 = df_relationships.groupby('DecodedName1').count().sort_values(
         'ImageID', ascending=False).head(top_n_labels)['ImageID'].to_frame()
 
-    top_labels2 = relationships.groupby('LabelName2').count().sort_values(
+    top_labels2 = df_relationships.groupby('DecodedName2').count().sort_values(
         'ImageID', ascending=False).head(top_n_labels)['ImageID'].to_frame()
 
     for i in range(top_n_labels):
@@ -137,14 +139,34 @@ def get_image_generator(relationships_location, imgs_dir,
         else:
             top_labels1 = top_labels1.append(top_labels2.iloc[i])
 
-    top = top_labels1.head(top_n_labels).index.values
+    return top_labels1.head(top_n_labels).index.values
 
+
+def get_image_generator(relationships_location, imgs_dir,
+                        labels=[], top_n_labels=10,
+                        number_of_images=-1,
+                        resize=True, size=(300, 300), interpolation=cv2.INTER_LINEAR,
+                        normalize=True, min=-1, max=1, norm_type=cv2.NORM_MINMAX
+                        ):
+
+    df_relationships = pd.read_csv(relationships_location)
+
+    decode_dict = get_decode_dict()
+
+    def decode_label(label_code):
+        return decode_dict[label_code]
+
+    df_relationships['DecodedName1'] = df_relationships['LabelName1'].apply(decode_label)
+    df_relationships['DecodedName2'] = df_relationships['LabelName2'].apply(decode_label)
+
+    if not labels:
+        labels = get_top_n_labels(df_relationships, top_n_labels)
     labels_coded = {}
 
-    for i in range(len(top)):
-        labels_coded[top[i]] = i
+    for i in range(len(labels)):
+        labels_coded[labels[i]] = i
 
-    g = image_preprocessing_func(imgs_dir, relationships, top, labels_coded,
+    g = image_preprocessing_func(imgs_dir, df_relationships, labels, labels_coded,
                                  number_of_images, resize, size, interpolation,
                                  normalize, min, max, norm_type)
     return g, labels_coded
