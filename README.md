@@ -22,3 +22,9 @@ docker run --gpus all -u $(id -u):$(id -g) --rm -p 8888:8888 -p 6006:6006 -v $(p
 
 ```
 
+## Project documentation
+
+You can find project documentation in 
+[/documents/Documentation](https://github.com/FrantisekSefcik/NNets/blob/master/documents/Documentation.md). 
+There is described architecture of model, learning pipeline and evaluation of experiments.  
+
