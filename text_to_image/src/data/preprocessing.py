@@ -142,7 +142,7 @@ def get_top_n_labels(df_relationships, top_n_labels):
     return top_labels1.head(top_n_labels).index.values
 
 
-def get_image_generator(relationships_location, imgs_dir,
+def get_image_generator(relationships_location, imgs_dir, label_codes_path='../../data/metadata/label_names.csv',
                         labels=[], top_n_labels=10,
                         number_of_images=-1,
                         resize=True, size=(300, 300), interpolation=cv2.INTER_LINEAR,
@@ -151,7 +151,7 @@ def get_image_generator(relationships_location, imgs_dir,
 
     df_relationships = pd.read_csv(relationships_location)
 
-    decode_dict = get_decode_dict()
+    decode_dict = get_decode_dict(label_codes_path)
 
     def decode_label(label_code):
         return decode_dict[label_code]
