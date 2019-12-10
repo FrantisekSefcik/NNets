@@ -80,7 +80,42 @@ generation of images with two objects.
 
 ## Data analysis
 
+We were working with Open Image dataset. 
+Further analysis is accessible 
+[here](https://github.com/FrantisekSefcik/NNets/blob/master/text_to_image/data/Data%20analysis.ipynb).
+
+In our experiment we are using a subset of images, which are containing top 10 most frequent labels in 
+relationship triplets.
+
 ## Data preprocessing
+
+Because of the higher number of objects in image scenes we needed to simplify 
+the images and work with fewer types of labels. We decided to cut out the objects from images 
+according to defined bounding boxes. This approach gave us more samples with simpler composition,
+which seemed be helpful by training.
+
+Our preprocessing function has the following parameters/settings:
+
+- relationships_location - path to csv file with object relationships 
+- imgs_dir - path to directory with images
+- label_codes_path - path to csv file with label codes
+- labels - list of labels we are interested in, the function returns bounding boxes only with specified objects, 
+if not defined, the top N most frequent labels are used
+- top_n_labels - in case, that labels are not defined, the function works with most frequent labels, this parameter 
+defines the number of labels
+- number_of_images - number of images to be processed (we were working with 23 551 images with cca 200 000 labels,
+we did not use all the images in every experiment)
+- resize - defines, whether the image should be resized 
+- size - defines the desired shape of the image after resizing
+- interpolation - defines the interpolation mode used by image resizing
+- normalize - defines, whether the image pixels should be normalized
+- min - new min value in case of normalization
+- max - new max value in case of normalization 
+- norm_type - normalization type used by normalization 
+- triplets - if true, relationship triplets are returned (for example 'Woman at Table'), in that case the returned image
+is containing both objects. If false, every returned image contains one object's bounding box.
+
+These settings allow us to easily try out more approaches and different preprocessing methods during our experiments. 
 
 ## Network architecture
 
