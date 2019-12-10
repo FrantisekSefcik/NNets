@@ -223,6 +223,22 @@ was able generate images with common shapes and colors for objects in class. In 
 
 ### v4
 
+[text_to_image/v4/cDCGAN_openimage](https://github.com/FrantisekSefcik/NNets/blob/master/text_to_image/v4/cDCGAN_openimage.ipynb) 
+
+
+For last experiments we trained our conditional gan model on open image dataset. We prepered data for 
+experiments:
+* Training on whole image with label of one object in image, so one image was used more than one time, because
+more objects are present in image.
+* Training on objects when we extract image as bounding box of this object. Then we can filter number of classes 
+and cut out object area from image to minimize complexity.
+* Last experiment we proposed training on pair objects with their relationship. We cut out from image area
+ where object are present. 
+ 
+In the picture bellow you can see that loss value evaluation of openimage differed from loss values from cifar dataset.
+We were not able to achieve decreasing of loss values for openimage. And generated images is not reasonable.  
+ 
+![text_to_image](./imgs/openimage.png)  
 
 ## Evaluation
 
@@ -232,8 +248,13 @@ with conditional GAN network on the same dataset (v2), and this approach returne
 
 In next step we were experimenting with RGB images from Cifar10 dataset (v3). In this stage we tried to find the 
 best architecture for our last experiment with Open Image dataset. This experiment gave us acceptable results,
-so we could begin to work with the Open Image dataset.
+so we could begin to work with the Open Image dataset. 
 
+In v4 where we trained our model on OpenImage dataset we were trying to get reasonable output, but problem was with
+higher complexity of image scenes. For this scope we did not reached good results in generating of images.
+
+In this project we build a method that was able to generate new images. We proposed method to generate images with
+more than one object present in.    
 
 
 ### References
