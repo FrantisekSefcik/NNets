@@ -84,45 +84,110 @@ generation of images with two objects.
 
 ## Network architecture
 
+In the picture you can see architecture of out conditional GAN. There is generator model which try to generate new 
+images according to input labels and noise. We concat labels with noise after it is processed with embedding and dense
+layers to achieve same shape.
+
+Then we define discriminator which try to recognize if input image is fake or real. Labels are processed with embedding
+and dense layers same as in generator. 
+
+![Drag Racing](./imgs/cgan.png)  
+
 ## Training pipeline
 
 We have prepared base pipeline from loading data to training of conditional GAN.
 
 #### Data loading
 For easy data operation we have created function ```create_image_generator()``` placed in preprocessing.py file. This 
-function return generator for batches of images and their labels. Images are preprocessed and have parameters which we 
+function is described in [Data preprocessing](#Data preprocessing). Images are preprocessed and have parameters which we 
 define as arguments of function, so we can easily use them for training model.   
 
 #### Networks model generation
-We create three model:
+For each training we create three models:
  * generator - generating of new images
  * discriminator - distinguishes ether generated image is fake or not
  * combined - generator and discriminator are combined to one model 
  
-For clear defining of new models we created object ```GANColor``` that is responsible for creating af these three models
-according of input parameters: ```input_image shape, number of images classes, input_noise lenght ```.
-Models are placed in  
+For clear defining of new models we created object ```GAN```, ```GANColor```, ```GanRGB``` objects that handle 
+creating of these three models above according of input parameters: ```input_image shape, number of images classes, input_noise lenght ```.
+All models are placed in [text_to_image/src/models/c_dcgan.py](https://github.com/FrantisekSefcik/NNets/blob/master/documents/Documentation.md)  
 
 #### Training of model
-For training we created script ```cDCGAN_train.py```, where we define all objects and hyper-parameters needs for
-training. We define number of epochs, batch size, atc. ```CGanTrainer``` is object placed in train_helpers.py file that 
-contains many of methods needs for training, also it define train_step function for models. In final we save generator 
-model.
+For training we created script ```cDCGAN_train.py``` or jupyter notebooks, where we define all objects and 
+hyper-parameters needs for training. We define number of epochs, batch size, atc. ```CGanTrainer``` is object placed 
+in **train_helpers.py** file that contains many of methods needs for training, also it define train_step function for models.
+Each trained model is saved in models folder.
 
-##### Monitoring
-We monitor training process with TensorBoard when we log loss values of all three models. Then we also save image of 
-new generated images so we can control reliability of generated images.
+#### Monitoring
+We monitor training process with TensorBoard when we log loss values of all three models. Then we also log plot of 
+new generated images for each epoch so we can control reliability of generated images.
 
-* logging
+* **logging** - graphs form tensorboard
 
 ![text_to_image](./imgs/loss.png)
 
-* images
+* **images** - overview of generated images for each epoch in tensorboard
 
-![text_to_image](./imgs/epoch_0005.png)        
+![text_to_image](./imgs/image_monitoring.png)      
 
+
+#### Evaluation
+
+We decide to evaluate our results by manually visualization check. We compere generated images with expected samples and
+discussed similarity and eventually improvements. For this evaluation task we prepared helper functions for generating and 
+visualizing generated images. 
 
 ## Experiments
+
+We divided all experiments to 4 stages:
+
+### V1
+[text_to_image/v1/dcgan](https://github.com/FrantisekSefcik/NNets/blob/master/text_to_image/v1/dcgan.ipynb)  
+
+In the first stage we created basic GAN model for MNIST dataset with numbers. We wanted to learn same basic concepts of
+GAN architecture. Also in this stage with basic model it was easier to set-up environment with Docker and create 
+project structure.
+
+All experiments for this stage are placed in **v1** folder. We successfully trained GAN model, that was able to generate 
+reasonable images of numbers and also fashion mnist clothes as you can see in the picture.  
+![text_to_image](./imgs/gan.png)     
+
+### v2
+[text_to_image/v2/cDCGAN_mnist](https://github.com/FrantisekSefcik/NNets/blob/master/text_to_image/v2/cDCGAN_mnist.ipynb) 
+
+In second stage we created conditional GAN and trained on fashion mnist dataset. For this experiment we met lots of 
+problems to balance generator and discriminator to by trained. We had to define new way to train model and add more 
+monitoring tools. 
+
+At final we successfully trained model that was able to generate imeges according to input labels. Check the image, 
+results are really similar to original images. 
+![text_to_image](./imgs/fashion_eval.png)  
+
+
+### v3
+[text_to_image/v3/cDCGAN_cifar](https://github.com/FrantisekSefcik/NNets/blob/master/text_to_image/v3/cDCGAN_cifar.ipynb) 
+
+In this stage we created model able to generate RGB images. For the reason that our Openimage dataset has much more 
+complex images we decided to use Cifar10 dataset. It was ideally choice, because there was only 10 classes and only 
+one object per image.
+
+Here we experiment with:
+
+* Batch normalization
+* Dropout layers
+* Complex architecture
+* Gaussian noise in discriminator
+* Noise shape
+
+We perform many different experiments in this stage to achieve best architecture to final stage. We trained model that
+was able generate images with common shapes and colors for objects in class. In the picture you can see a car.  
+
+![text_to_image](./imgs/cifar_eval.png)  
+
+![text_to_image](./imgs/image_monitoring.png)  
+
+### v4
+
 
 ## Evaluation
 
