@@ -226,9 +226,13 @@ was able generate images with common shapes and colors for objects in class. In 
 
 ## Evaluation
 
+We were experimenting with more types of GAN architecture. First we tried out the basic GAN model with
+MNIST dataset (v1), which gave us recognizable images, but in lower quality. Therefore we made an experiment
+with conditional GAN network on the same dataset (v2), and this approach returned significantly better results.
 
-
-
+In next step we were experimenting with RGB images from Cifar10 dataset (v3). In this stage we tried to find the 
+best architecture for our last experiment with Open Image dataset. This experiment gave us acceptable results,
+so we could begin to work with the Open Image dataset.
 
 
 
