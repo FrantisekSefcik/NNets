@@ -117,6 +117,59 @@ def image_preprocessing_func(imgs_dir, relationships, top, labels_coded,
     return np.array(boxes), np.array(labels)
 
 
+def image_preprocessing_triplets(imgs_dir, relationships, top, labels_coded,
+                              number_of_images=-1,
+                              resize=True, size=(300, 300), interpolation=cv2.INTER_LINEAR,
+                              normalize=True, min=-1, max=1, norm_type=cv2.NORM_MINMAX):
+
+    directory = os.fsencode(imgs_dir)
+
+    labels1 = []
+    labels2 = []
+    labels_rel = []
+    boxes = []
+
+    for file in os.listdir(directory)[:number_of_images]:
+        filename = os.fsdecode(file)
+        if filename.endswith(".npy"):
+            image_id = filename.split('.')[0]
+            image = np.load(imgs_dir + filename)
+            if len(image.shape) < 3:
+                continue
+
+            for index, row in relationships[relationships['ImageID'] == image_id].iterrows():
+
+                label1 = row['DecodedName1']
+                relationship = row['RelationshipLabel']
+                label2 = row['DecodedName2']
+
+                imagex = image.shape[1]
+                imagey = image.shape[0]
+
+                if (label1 in top) and (label2 in top):
+                    x1min, x1max, y1min, y1max = row['XMin1'], row['XMax1'], row['YMin1'], row['YMax1']
+                    x2min, x2max, y2min, y2max = row['XMin2'], row['XMax2'], row['YMin2'], row['YMax2']
+
+                    xmin = x1min if x1min < x2min else x2min
+                    xmax = x1max if x1max > x2max else x2max
+                    ymin = y1min if y1min < y2min else y2min
+                    ymax = y1max if y1max > y2max else y2max
+
+                    labels1.append(labels_coded[label1])
+                    labels2.append(labels_coded[label2])
+                    labels_rel.append(labels_coded[relationship])
+
+                    x1, x2, y1, y2 = get_boundaries(imagex, imagey, xmin, xmax, ymin, ymax)
+                    box = image[y1: y2, x1: x2]
+                    if resize:
+                        box = resize_image(box, size, interpolation)
+                    if normalize:
+                        box = normalize_image(box, min, max, norm_type)
+                    boxes.append(box)
+
+    return np.array(boxes), np.array((labels1, labels2, labels_rel))
+
+
 def get_decode_dict(path='../../data/metadata/label_names.csv'):
     decode_dict = {}
     label_names = pd.read_csv(path, header=None, names=['Code', 'Name'])
@@ -146,7 +199,7 @@ def get_image_generator(relationships_location, imgs_dir, label_codes_path='../.
                         labels=[], top_n_labels=10,
                         number_of_images=-1,
                         resize=True, size=(300, 300), interpolation=cv2.INTER_LINEAR,
-                        normalize=True, min=-1, max=1, norm_type=cv2.NORM_MINMAX
+                        normalize=True, min=-1, max=1, norm_type=cv2.NORM_MINMAX, triplets=False
                         ):
 
     df_relationships = pd.read_csv(relationships_location)
@@ -160,13 +213,20 @@ def get_image_generator(relationships_location, imgs_dir, label_codes_path='../.
     df_relationships['DecodedName2'] = df_relationships['LabelName2'].apply(decode_label)
 
     if not labels:
-        labels = get_top_n_labels(df_relationships, top_n_labels)
+        labels = get_top_n_labels(df_relationships, top_n_labels).tolist()
     labels_coded = {}
+
+    labels += df_relationships['RelationshipLabel'].unique().tolist()
 
     for i in range(len(labels)):
         labels_coded[labels[i]] = i
 
-    g = image_preprocessing_func(imgs_dir, df_relationships, labels, labels_coded,
-                                 number_of_images, resize, size, interpolation,
-                                 normalize, min, max, norm_type)
+    if triplets:
+        g = image_preprocessing_triplets(imgs_dir, df_relationships, labels, labels_coded,
+                                         number_of_images, resize, size, interpolation,
+                                         normalize, min, max, norm_type)
+    else:
+        g = image_preprocessing_func(imgs_dir, df_relationships, labels, labels_coded,
+                                     number_of_images, resize, size, interpolation,
+                                     normalize, min, max, norm_type)
     return g, labels_coded
