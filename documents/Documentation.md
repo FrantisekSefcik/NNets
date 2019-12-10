@@ -128,7 +128,7 @@ new generated images for each epoch so we can control reliability of generated i
 
 * **images** - overview of generated images for each epoch in tensorboard
 
-![text_to_image](./imgs/image_monitoring.png)      
+![text_to_image](./imgs/monitoring.png)      
 
 
 #### Evaluation
@@ -184,7 +184,7 @@ was able generate images with common shapes and colors for objects in class. In 
 
 ![text_to_image](./imgs/cifar_eval.png)  
 
-![text_to_image](./imgs/image_monitoring.png)  
+![text_to_image](./imgs/monitoring.png)  
 
 ### v4
 
